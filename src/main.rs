@@ -1,14 +1,18 @@
-use fltk::{app, prelude::*, window::*, button::{*, self}, frame::*, enums::Color};
-use std::process::Command;
+use fltk::{app, prelude::*, window::*, button::*, frame::*, enums::Color};
+//use std::process::Command;
 
-pub fn iw_list(){
-    let mut iw_cmd = Command::new("iwconfig")
-    //.arg("|").arg("awk").arg("'/ESSID {print $1}'")
+//static mut GLB_IW_OUT: &str = "none";
+
+/*pub fn iw_list(){
+    let iw_cmd = Command::new("iwconfig")
+    .arg("|").arg("awk").arg("'/ESSID {print $1}'")
     .output()
     .expect("iwconfig failed");
     let iw_cmd_out = String::from_utf8(iw_cmd.stdout).unwrap(); 
-    static glb_iw_out: String = iw_cmd_out;
-}
+    unsafe {
+        GLB_IW_OUT = &String::from_utf8(iw_cmd.stdout).unwrap();
+    }
+}*/
 
 fn interfaces() {  
    
@@ -21,7 +25,9 @@ fn interfaces() {
         .with_size(300, 75)
         .with_label("iwconfig")
         .center_x(&int_wind);
-        iw_but.set_callback(move |_| println!("{}", &glb_iw_out));
+        /*unsafe {
+            iw_but.set_callback(move |_| println!("{}", &GLB_IW_OUT));
+        }*/
 
         let mut frame = Frame::default()
         .with_size(500,500)
@@ -44,14 +50,44 @@ fn ap_scan() {
     ap_wind.show();
 }
 
+fn pac_cap() {
+    let mut pc_wind = OverlayWindow::default()
+    .with_size(1280, 800)
+    .center_screen()
+    .with_label("Packet Capture");
+
+    pc_wind.end();
+    pc_wind.show();
+}
+
+fn air_play() {
+    let mut air_play_wind = OverlayWindow::default()
+    .with_size(1280, 800)
+    .center_screen()
+    .with_label("Air Play");
+
+    air_play_wind.end();
+    air_play_wind.show();
+}
+
+fn air_crack() {
+    let mut air_crack_wind = OverlayWindow::default()
+    .with_size(1280, 800)
+    .center_screen()
+    .with_label("Air Crack");
+
+    air_crack_wind.end();
+    air_crack_wind.show();
+}
+
 fn main() {
     let app = app::App::default();
 
 
     let mut wind = Window::default()
-        .with_size(1280, 800)
-        .center_screen()
-        .with_label("AirOut");
+    .with_size(1280, 800)
+    .center_screen()
+    .with_label("AirOut");
 
         let mut interfaces_but = Button::default()
         .with_size(300, 75)
@@ -65,6 +101,27 @@ fn main() {
         .center_x(&wind)
         .below_of(&interfaces_but, 10);
         ap_scan_but.set_callback(move |_| ap_scan());
+
+        let mut pack_cap_but = Button::default()
+        .with_size(300, 75)
+        .with_label("Start/Stop Packet Capture")
+        .center_x(&wind)
+        .below_of(&ap_scan_but, 10);
+        pack_cap_but.set_callback(move |_| pac_cap());
+
+        let mut air_play_but = Button::default()
+        .with_size(300, 75)
+        .with_label("Disconnect Clients From AP")
+        .center_x(&wind)
+        .below_of(&pack_cap_but, 10);
+        air_play_but.set_callback(move |_| air_play());
+
+        let mut air_crack_but = Button::default()
+        .with_size(300, 75)
+        .with_label("Crack Password")
+        .center_x(&wind)
+        .below_of(&air_play_but, 10);
+        air_crack_but.set_callback(move |_| air_crack());
 
 
     wind.end();
