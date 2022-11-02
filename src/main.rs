@@ -1,4 +1,4 @@
-use fltk::{app, prelude::*, window::*, button::*, frame::*, enums::Color};
+use fltk::{app::{self, delete_widget}, prelude::*, window::*, button::*, frame::*, enums::Color};
 //use std::process::Command;
 
 //static mut GLB_IW_OUT: &str = "none";
@@ -15,7 +15,6 @@ use fltk::{app, prelude::*, window::*, button::*, frame::*, enums::Color};
 }*/
 
 fn interfaces() {  
-   
     let mut int_wind = OverlayWindow::default()
     .with_size(1280, 800)
     .center_screen()
@@ -28,16 +27,28 @@ fn interfaces() {
         /*unsafe {
             iw_but.set_callback(move |_| println!("{}", &GLB_IW_OUT));
         }*/
-
+        
+        /*
         let mut frame = Frame::default()
         .with_size(500,500)
         //.with_label(&iw_cmd_out)
         .center_x(&int_wind)
         .below_of(&iw_but, 0)
         .set_color(Color::Dark2);
+        */
+
+        let mut close_but = Button::default()
+        .with_size(300, 75)
+        .with_label("Close Window")
+        //.center_x(&int_wind)
+        //.below_of(&iw_but, 10);
+        .with_pos(970, 715);
+        //close_but.set_callback(move |_| );
 
     int_wind.end();
+    int_wind.make_resizable(true);
     int_wind.show();
+    close_but.set_callback(move |_| int_wind.deactivate());
 }
 
 fn ap_scan() {
@@ -123,8 +134,15 @@ fn main() {
         .below_of(&air_play_but, 10);
         air_crack_but.set_callback(move |_| air_crack());
 
+        let mut close_but = Button::default()
+        .with_size(300, 75)
+        .with_label("Close Window")
+        .set_pos(970, 715);
+        //close_but.set_callback(move |_| int_wind.remove);
 
+    wind.set_color(Color::Dark3);
     wind.end();
+    wind.make_resizable(true);
     wind.show();
     app.run().unwrap();
 }
