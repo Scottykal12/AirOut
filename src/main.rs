@@ -42,10 +42,7 @@ fn interfaces() {
         let mut close_but = Button::default()
         .with_size(300, 75)
         .with_label("Close Window")
-        //.center_x(&int_wind)
-        //.below_of(&iw_but, 10);
         .with_pos(970, 715);
-        //close_but.set_callback(move |_| );
 
     int_wind.end();
     int_wind.make_resizable(true);
@@ -59,8 +56,14 @@ fn ap_scan() {
     .center_screen()
     .with_label("AP Scan");
 
+    let mut close_but = Button::default()
+    .with_size(300, 75)
+    .with_label("Close Window")
+    .with_pos(970, 715);
+
     ap_wind.end();
     ap_wind.show();
+    close_but.set_callback(move |_| ap_wind.hide());
 }
 
 fn pac_cap() {
@@ -69,8 +72,14 @@ fn pac_cap() {
     .center_screen()
     .with_label("Packet Capture");
 
+    let mut close_but = Button::default()
+    .with_size(300, 75)
+    .with_label("Close Window")
+    .with_pos(970, 715);
+
     pc_wind.end();
     pc_wind.show();
+    close_but.set_callback(move |_| pc_wind.hide());
 }
 
 fn air_play() {
@@ -78,9 +87,15 @@ fn air_play() {
     .with_size(1280, 800)
     .center_screen()
     .with_label("Air Play");
+    
+    let mut close_but = Button::default()
+    .with_size(300, 75)
+    .with_label("Close Window")
+    .with_pos(970, 715);
 
     air_play_wind.end();
     air_play_wind.show();
+    close_but.set_callback(move |_| air_play_wind.hide());
 }
 
 fn air_crack() {
@@ -89,8 +104,14 @@ fn air_crack() {
     .center_screen()
     .with_label("Air Crack");
 
+    let mut close_but = Button::default()
+    .with_size(300, 75)
+    .with_label("Close Window")
+    .with_pos(970, 715);
+
     air_crack_wind.end();
     air_crack_wind.show();
+    close_but.set_callback(move |_| air_crack_wind.hide());
 }
 
 fn main() {
@@ -105,6 +126,7 @@ fn main() {
         let mut interfaces_but = Button::default()
         .with_size(300, 75)
         .with_label("Interfaces")
+        .with_padding()
         .center_x(&wind);
         interfaces_but.set_callback(move |_| interfaces());
 
