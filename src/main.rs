@@ -1,7 +1,9 @@
 use fltk::{app::{self, delete_widget}, prelude::*, window::*, button::*, frame::*, enums::Color};
-//use std::process::Command;
+use std::process::{abort, Command};
 
 //static mut GLB_IW_OUT: &str = "none";
+
+//https://stackoverflow.com/questions/73469520/how-to-pipe-commands-in-rust
 
 /*pub fn iw_list(){
     let iw_cmd = Command::new("iwconfig")
@@ -48,7 +50,7 @@ fn interfaces() {
     int_wind.end();
     int_wind.make_resizable(true);
     int_wind.show();
-    close_but.set_callback(move |_| int_wind.deactivate());
+    close_but.set_callback(move |_| int_wind.hide());
 }
 
 fn ap_scan() {
@@ -136,13 +138,13 @@ fn main() {
 
         let mut close_but = Button::default()
         .with_size(300, 75)
-        .with_label("Close Window")
-        .set_pos(970, 715);
-        //close_but.set_callback(move |_| int_wind.remove);
+        .with_label("Close")
+        .with_pos(970, 715);
 
     wind.set_color(Color::Dark3);
     wind.end();
     wind.make_resizable(true);
     wind.show();
+    close_but.set_callback(move |_| wind.hide());
     app.run().unwrap();
 }
