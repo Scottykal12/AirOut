@@ -4,6 +4,7 @@ use std::process::{abort, Command};
 //static mut GLB_IW_OUT: &str = "none";
 
 //https://stackoverflow.com/questions/73469520/how-to-pipe-commands-in-rust
+//iw dev | grep Interface | awk -F ' ' '{print $2}'
 
 /*pub fn iw_list(){
     let iw_cmd = Command::new("iwconfig")
