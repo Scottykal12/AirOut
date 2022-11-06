@@ -127,7 +127,6 @@ fn main() {
         let mut interfaces_but = Button::default()
         .with_size(300, 75)
         .with_label("Interfaces")
-        .with_padding()
         .center_x(&wind);
         interfaces_but.set_callback(move |_| interfaces());
 
