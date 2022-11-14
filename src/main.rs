@@ -1,13 +1,15 @@
 use fltk::{app::{self, delete_widget}, prelude::*, window::*, button::*, frame::*, enums::Color};
-use std::{process::abort, process::Command, process::Stdio, str};
+use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str};
 
 
 //static mut GLB_IW_OUT: &str = "none";
 
 //https://stackoverflow.com/questions/73469520/how-to-pipe-commands-in-rust
 //iw dev | grep Interface | awk -F ' ' '{print $2}'
+//calculate_length
+//-> impl  AsRef<str>
 
-fn get_interface(){
+fn get_interface() -> &'static str {
     let iw_cmd = Command::new("iw")
     .arg("dev")
     .stdout(Stdio::piped())
@@ -21,15 +23,16 @@ fn get_interface(){
     .unwrap();
     let awk_child = Command::new("awk")
     .arg("-F")
-    .arg("' '")
-    .arg("'{print $2}")
+    .arg(" ")
+    .arg("{print $2}")
     .stdin(Stdio::from(grep_child.stdout.unwrap()))
     .stdout(Stdio::piped())
     .spawn()
     .unwrap();
-    let raw_out = awk_child.wait_with_output().unwrap();
-    let read_out = str::from_utf8(&raw_out.stdout).unwrap();
+    //let raw_out:&'static Output = awk_child.wait_with_output().unwrap();
+    let read_out:&'static str = str::from_utf8(&awk_child.wait_with_output().unwrap().stdout).unwrap();
     println!("Your wireless interface is {}", read_out );
+    return read_out;
 }
 
 fn interfaces() {  
@@ -43,16 +46,14 @@ fn interfaces() {
         .with_label("iwconfig")
         .center_x(&int_wind);
 
-        iw_but.set_callback(move |_| get_interface());
+        //iw_but.set_callback(move |_| get_interface());
         
-        /*
         let mut frame = Frame::default()
         .with_size(500,500)
-        //.with_label(&iw_cmd_out)
+        .with_label(get_interface())
         .center_x(&int_wind)
         .below_of(&iw_but, 0)
         .set_color(Color::Dark2);
-        */
 
         let mut close_but = Button::default()
         .with_size(300, 75)
