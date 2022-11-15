@@ -1,5 +1,5 @@
-use fltk::{app::{self, delete_widget}, prelude::*, window::*, button::*, frame::*, enums::Color};
-use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str};
+use fltk::{app::{self, delete_widget}, prelude::*, window::*, button::*, frame::*, enums::Color, output};
+use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str::{self, FromStr}};
 
 
 //static mut GLB_IW_OUT: &str = "none";
@@ -9,7 +9,61 @@ use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str
 //calculate_length
 //-> impl  AsRef<str>
 
-fn get_interface() -> &'static str {
+static mut ISMONMODE: bool = false;
+
+fn mon_mode_on() {
+    //put interface into monotor mode
+    let monenabled_ret = String::from("Moniotor mode enabled");
+    
+    unsafe {
+        if ISMONMODE == true {
+            println!("{}", monenabled_ret);
+            //return monenabled_ret;
+        }else{
+            //airmon-ng start $wint
+            let mon_enable = Command::new("airmon-ng")
+            .arg("start")
+            .arg(&get_interface())
+            .spawn()
+            .unwrap();
+            
+            ISMONMODE = true;
+
+            println!("{}", monenabled_ret)
+
+            //return monenabled_ret;
+        }
+    }
+}
+
+fn mon_mode_off() {
+    //put interface into monotor mode
+    let mondisabled_ret = String::from("Moniotor mode disabled");
+    let mut mon_interface = get_interface();
+    mon_interface.push_str("mon");
+
+    unsafe {
+        if ISMONMODE == false {
+            println!("{}", mondisabled_ret);
+            //return monenabled_ret;
+        }else{
+            //airmon-ng start $wint
+            let mon_enable = Command::new("airmon-ng")
+            .arg("stop")
+            .arg(&mon_interface)
+            .spawn()
+            .unwrap();
+            
+            ISMONMODE = true;
+
+            println!("{}", mondisabled_ret);
+
+            //return monenabled_ret;
+        }
+    }
+}
+
+fn get_interface() -> String {
     let iw_cmd = Command::new("iw")
     .arg("dev")
     .stdout(Stdio::piped())
@@ -29,10 +83,11 @@ fn get_interface() -> &'static str {
     .stdout(Stdio::piped())
     .spawn()
     .unwrap();
-    //let raw_out:&'static Output = awk_child.wait_with_output().unwrap();
-    let read_out:&'static str = str::from_utf8(&awk_child.wait_with_output().unwrap().stdout).unwrap();
+    let raw_out = awk_child.wait_with_output().unwrap();
+    let read_out = str::from_utf8(&raw_out.stdout).unwrap();
+    let interface_name = read_out.to_owned();
     println!("Your wireless interface is {}", read_out );
-    return read_out;
+    return interface_name;
 }
 
 fn interfaces() {  
@@ -41,18 +96,26 @@ fn interfaces() {
     .center_screen()
     .with_label("Interfaces");
 
-        let mut iw_but = Button::default()
+        let mut en_mon_int = Button::default()
         .with_size(300, 75)
-        .with_label("iwconfig")
+        .with_label("Enable Monitor Mode")
         .center_x(&int_wind);
 
-        //iw_but.set_callback(move |_| get_interface());
+        en_mon_int.set_callback(move |_| mon_mode_on());
+
+        let mut dis_mon_int = Button::default()
+        .with_size(300, 75)
+        .with_label("Enable Monitor Mode")
+        .below_of(&en_mon_int, 10)
+        .center_x(&int_wind);
+
+        dis_mon_int.set_callback(move |_| mon_mode_off());
         
         let mut frame = Frame::default()
         .with_size(500,500)
-        .with_label(get_interface())
+        .with_label(&get_interface())
         .center_x(&int_wind)
-        .below_of(&iw_but, 0)
+        .below_of(&dis_mon_int, 0)
         .set_color(Color::Dark2);
 
         let mut close_but = Button::default()
