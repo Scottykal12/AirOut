@@ -1,5 +1,5 @@
 use fltk::{app::{self, delete_widget}, prelude::*, window::*, button::*, frame::*, enums::Color, output};
-use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str::{self, FromStr}};
+use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str::{self, FromStr}, os::unix::process::CommandExt};
 
 
 //static mut GLB_IW_OUT: &str = "none";
@@ -25,10 +25,9 @@ fn mon_mode_on() {
             .arg("airmon-ng")
             .arg("start")
             .arg(&get_interface())
-            .status()
-            .expect("Failed to enable monitor");
+            .exec();
             
-            //ISMONMODE = true;
+            ISMONMODE = true;
 
             println!("{}", monenabled_ret)
 
@@ -53,8 +52,7 @@ fn mon_mode_off() {
             .arg("airmon-ng")
             .arg("stop")
             .arg(&mon_interface)
-            .status()
-            .expect("Faile to disable monitor");
+            .exec();
             
             ISMONMODE = false;
 
