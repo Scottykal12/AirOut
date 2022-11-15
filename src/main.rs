@@ -21,13 +21,14 @@ fn mon_mode_on() {
             //return monenabled_ret;
         }else{
             //airmon-ng start $wint
-            let mon_enable = Command::new("airmon-ng")
+            Command::new("pkexec")
+            .arg("airmon-ng")
             .arg("start")
             .arg(&get_interface())
-            .spawn()
-            .unwrap();
+            .status()
+            .expect("Failed to enable monitor");
             
-            ISMONMODE = true;
+            //ISMONMODE = true;
 
             println!("{}", monenabled_ret)
 
@@ -48,13 +49,14 @@ fn mon_mode_off() {
             //return monenabled_ret;
         }else{
             //airmon-ng start $wint
-            let mon_enable = Command::new("airmon-ng")
+            Command::new("pkexec")
+            .arg("airmon-ng")
             .arg("stop")
             .arg(&mon_interface)
-            .spawn()
-            .unwrap();
+            .status()
+            .expect("Faile to disable monitor");
             
-            ISMONMODE = true;
+            ISMONMODE = false;
 
             println!("{}", mondisabled_ret);
 
@@ -105,7 +107,7 @@ fn interfaces() {
 
         let mut dis_mon_int = Button::default()
         .with_size(300, 75)
-        .with_label("Enable Monitor Mode")
+        .with_label("Disable Monitor Mode")
         .below_of(&en_mon_int, 10)
         .center_x(&int_wind);
 
