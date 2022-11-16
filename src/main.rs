@@ -1,7 +1,9 @@
-use fltk::{app::{self, delete_widget}, prelude::*, window::*, button::*, frame::*, enums::Color, output};
+use fltk::{app::{self, delete_widget, App}, prelude::*, window::*, button::*, frame::*, enums::Color, output};
 use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str::{self, FromStr}, os::unix::process::CommandExt};
 
 mod commands;
+
+//static life && no mon
 
 fn interfaces() {  
     let mut int_wind = OverlayWindow::default()

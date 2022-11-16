@@ -2,6 +2,8 @@ use std::{process::{Command, Stdio}, os::unix::process::CommandExt, str::{self, 
 
 static mut ISMONMODE: bool = false;
 
+//isue with comman && execute
+
 pub fn mon_mode_on() {
     //put interface into monotor mode
     let monenabled_ret = String::from("Moniotor mode enabled");
@@ -16,7 +18,7 @@ pub fn mon_mode_on() {
             .arg("airmon-ng")
             .arg("start")
             .arg(&get_interface())
-            .exec();
+            .spawn();
             
             ISMONMODE = true;
 
@@ -35,7 +37,19 @@ pub fn mon_mode_off() {
 
     unsafe {
         if ISMONMODE == false {
+            Command::new("pkexec")
+            .arg("airmon-ng")
+            .arg("stop")
+            .arg(&get_interface())
+            .spawn();
+            
+            get_interface();
+
+            ISMONMODE = false;
+
             println!("{}", mondisabled_ret);
+
+            //return monenabled_ret;
             //return monenabled_ret;
         }else{
             //airmon-ng start $wint
@@ -43,7 +57,7 @@ pub fn mon_mode_off() {
             .arg("airmon-ng")
             .arg("stop")
             .arg(&mon_interface)
-            .exec();
+            .spawn();
             
             ISMONMODE = false;
 
