@@ -63,6 +63,7 @@ fn mon_mode_off() {
     }
 }
 
+//Don't stop new line!!!
 fn get_interface() -> String {
     let iw_cmd = Command::new("iw")
     .arg("dev")
@@ -83,10 +84,18 @@ fn get_interface() -> String {
     .stdout(Stdio::piped())
     .spawn()
     .unwrap();
-    let raw_out = awk_child.wait_with_output().unwrap();
+    let xargs_child = Command::new("xargs")
+    .arg("echo")
+    .arg("-n")
+    .stdin(Stdio::from(awk_child.stdout.unwrap()))
+    .stdout(Stdio::piped())
+    .spawn()
+    .unwrap();
+
+    let raw_out = xargs_child.wait_with_output().unwrap();
     let read_out = str::from_utf8(&raw_out.stdout).unwrap();
     let interface_name = read_out.to_owned();
-    println!("Your wireless interface is {}", read_out );
+    print!("Your wireless interface is {}", read_out );
     return interface_name;
 }
 
