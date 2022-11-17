@@ -5,7 +5,7 @@ mod commands;
 
 //static life && no mon
 
-fn interfaces() {  
+pub fn interfaces() {  
     let mut int_wind = OverlayWindow::default()
     .with_size(1280, 800)
     .center_screen()
@@ -16,27 +16,35 @@ fn interfaces() {
         .with_label("Enable Monitor Mode")
         .center_x(&int_wind);
 
-        en_mon_int.set_callback(move |_| commands::mon_mode_on());
-
         let mut dis_mon_int = Button::default()
         .with_size(300, 75)
         .with_label("Disable Monitor Mode")
         .below_of(&en_mon_int, 10)
         .center_x(&int_wind);
-
-        dis_mon_int.set_callback(move |_| commands::mon_mode_off());
         
-        let mut frame = Frame::default()
-        .with_size(500,500)
-        .with_label(&commands::get_interface())
+        let mut frame_int = Frame::default()
+        .with_size(300,10)
         .center_x(&int_wind)
-        .below_of(&dis_mon_int, 0)
-        .set_color(Color::Dark2);
+        .below_of(&dis_mon_int, 0);
 
         let mut close_but = Button::default()
         .with_size(300, 75)
         .with_label("Close Window")
         .with_pos(970, 715);
+
+        en_mon_int.set_callback( |_|{
+            commands::mon_mode_on();
+            //frame_int.with_label(&commands::get_interface());
+        });
+
+        dis_mon_int.set_callback( |_| {
+            commands::mon_mode_off();
+            //frame_int.with_label(&commands::get_interface());
+        });
+
+        loop {
+            frame_int.with_label(&commands::get_interface());
+        }
 
     int_wind.end();
     int_wind.make_resizable(true);
@@ -161,5 +169,6 @@ fn main() {
     wind.make_resizable(true);
     wind.show();
     close_but.set_callback(move |_| wind.hide());
+    //close_but.set_callback(move |_| commands::mon_mode_off());
     app.run().unwrap();
 }

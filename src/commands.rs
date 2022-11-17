@@ -1,6 +1,6 @@
 use std::{process::{Command, Stdio}, os::unix::process::CommandExt, str::{self, FromStr}};
 
-static mut ISMONMODE: bool = false;
+pub static mut ISMONMODE: bool = false;
 
 //isue with comman && execute
 
