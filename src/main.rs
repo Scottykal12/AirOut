@@ -1,9 +1,7 @@
 use fltk::{app::{self, delete_widget, App}, prelude::*, window::*, button::*, frame::*, enums::Color, output};
-use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str::{self, FromStr}, os::unix::process::CommandExt};
+use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str::{self, FromStr}, os::unix::{process::CommandExt}, sync::mpsc::{self, Sender}, thread, cmp::Reverse};
 
 mod commands;
-
-//static life && no mon
 
 pub fn interfaces() {  
     let mut int_wind = OverlayWindow::default()
@@ -23,28 +21,25 @@ pub fn interfaces() {
         .center_x(&int_wind);
         
         let mut frame_int = Frame::default()
-        .with_size(300,10)
-        .center_x(&int_wind)
-        .below_of(&dis_mon_int, 0);
+        .with_size(300,20)
+        .with_pos(0, 0);
 
         let mut close_but = Button::default()
         .with_size(300, 75)
         .with_label("Close Window")
         .with_pos(970, 715);
 
-        en_mon_int.set_callback( |_|{
+        let update_int = frame_int.set_label(&commands::get_interface());
+
+        en_mon_int.set_callback(move |_| {
             commands::mon_mode_on();
-            //frame_int.with_label(&commands::get_interface());
+            update_int;
         });
 
-        dis_mon_int.set_callback( |_| {
+        dis_mon_int.set_callback(move |_| {
             commands::mon_mode_off();
-            //frame_int.with_label(&commands::get_interface());
+            update_int;
         });
-
-        loop {
-            frame_int.with_label(&commands::get_interface());
-        }
 
     int_wind.end();
     int_wind.make_resizable(true);
@@ -168,7 +163,9 @@ fn main() {
     wind.end();
     wind.make_resizable(true);
     wind.show();
-    close_but.set_callback(move |_| wind.hide());
-    //close_but.set_callback(move |_| commands::mon_mode_off());
+    close_but.set_callback(move |_| {
+        wind.hide();
+        commands::mon_mode_off();
+    });
     app.run().unwrap();
 }

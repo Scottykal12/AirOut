@@ -11,9 +11,7 @@ pub fn mon_mode_on() {
     unsafe {
         if ISMONMODE == true {
             println!("{}", monenabled_ret);
-            //return monenabled_ret;
         }else{
-            //airmon-ng start $wint
             Command::new("pkexec")
             .arg("airmon-ng")
             .arg("start")
@@ -23,8 +21,6 @@ pub fn mon_mode_on() {
             ISMONMODE = true;
 
             println!("{}", monenabled_ret)
-
-            //return monenabled_ret;
         }
     }
 }
@@ -35,6 +31,7 @@ pub fn mon_mode_off() {
     let mut mon_interface = get_interface();
     mon_interface.push_str("mon");
 
+    //clean this up please!!!
     unsafe {
         if ISMONMODE == false {
             Command::new("pkexec")
@@ -48,11 +45,7 @@ pub fn mon_mode_off() {
             ISMONMODE = false;
 
             println!("{}", mondisabled_ret);
-
-            //return monenabled_ret;
-            //return monenabled_ret;
         }else{
-            //airmon-ng start $wint
             Command::new("pkexec")
             .arg("airmon-ng")
             .arg("stop")
@@ -62,8 +55,6 @@ pub fn mon_mode_off() {
             ISMONMODE = false;
 
             println!("{}", mondisabled_ret);
-
-            //return monenabled_ret;
         }
     }
 }
