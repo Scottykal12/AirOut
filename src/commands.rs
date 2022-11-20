@@ -16,7 +16,8 @@ pub fn mon_mode_on() {
             .arg("airmon-ng")
             .arg("start")
             .arg(&get_interface())
-            .spawn();
+            .spawn()
+            .unwrap();
             
             ISMONMODE = true;
 
@@ -28,8 +29,8 @@ pub fn mon_mode_on() {
 pub fn mon_mode_off() {
     //put interface into monotor mode
     let mondisabled_ret = String::from("Moniotor mode disabled");
-    let mut mon_interface = get_interface();
-    mon_interface.push_str("mon");
+    //let mut mon_interface = get_interface();
+    //mon_interface.push_str("mon");
 
     //clean this up please!!!
     unsafe {
@@ -38,7 +39,8 @@ pub fn mon_mode_off() {
             .arg("airmon-ng")
             .arg("stop")
             .arg(&get_interface())
-            .spawn();
+            .spawn()
+            .unwrap();
             
             get_interface();
 
@@ -49,8 +51,9 @@ pub fn mon_mode_off() {
             Command::new("pkexec")
             .arg("airmon-ng")
             .arg("stop")
-            .arg(&mon_interface)
-            .spawn();
+            .arg(&get_interface())
+            .spawn()
+            .unwrap();
             
             ISMONMODE = false;
 
@@ -59,6 +62,7 @@ pub fn mon_mode_off() {
     }
 }
 
+//let's use airmon-n plaese!!!
 pub fn get_interface() -> String {
     let iw_cmd = Command::new("iw")
     .arg("dev")
@@ -90,6 +94,51 @@ pub fn get_interface() -> String {
     let raw_out = xargs_child.wait_with_output().unwrap();
     let read_out = str::from_utf8(&raw_out.stdout).unwrap();
     let interface_name = read_out.to_owned();
-    print!("Your wireless interface is {}", read_out );
+    println!("Your wireless interface is {}", read_out );
     return interface_name;
+}
+
+//need to stop airodump....
+pub fn dump_air () -> String{
+    let pkexec = Command::new("pkexec")
+    .arg("airodump-ng")
+    .arg(get_interface())
+    .stdout(Stdio::piped())
+    .spawn()
+    .unwrap();
+
+    let raw_out = pkexec.wait_with_output().unwrap();
+    let read_out = str::from_utf8(&raw_out.stdout).unwrap();
+    let dump_ap = read_out.to_owned();
+    return dump_ap
+}
+
+pub fn play_air(bssid: String, devmac: String, filenamloc: String ) {
+    let airplay = Command::new("pkexec")
+    .arg("aireplay-ng")
+    .arg(&get_interface())
+    .arg("--deauth")
+    .arg("3")
+    .arg("-a")
+    .arg(&bssid);
+
+    let pcap = Command::new("pkexec")
+    .arg("airodump-ng")
+    .arg(&get_interface())
+    .arg("--bssid")
+    .arg(&bssid)
+    .arg("-w")
+    .arg(&filenamloc);
+
+    //no null in rust!!!!
+    // if devmac != null {
+    // } else {
+    //     pcap.spawn();
+    //     airplay.arg("-c").arg(&devmac).spawn();
+
+    // } else {
+    //     pcap.spawn();
+    //     airplay.spawn();
+    // }
+
 }
