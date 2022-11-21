@@ -1,4 +1,5 @@
-use std::{process::{Command, Stdio}, os::unix::process::CommandExt, str::{self, FromStr}};
+use core::time;
+use std::{process::{Command, Stdio}, os::unix::process::CommandExt, str::{self, FromStr}, thread};
 
 pub static mut ISMONMODE: bool = false;
 
@@ -104,18 +105,22 @@ pub fn get_interface() -> String {
 
 //need to stop airodump....
 //child.kll().expect("This might Stop it?")
-pub fn dump_air () -> String{
-    let pkexec = Command::new("pkexec")
+pub fn dump_air() {
+    let mut pkexec = Command::new("pkexec")
     .arg("airodump-ng")
     .arg(get_interface())
     .stdout(Stdio::piped())
     .spawn()
     .unwrap();
 
+    thread::sleep(time::Duration::from_secs(10));
+    pkexec.kill().unwrap();
+
     let raw_out = pkexec.wait_with_output().unwrap();
     let read_out = str::from_utf8(&raw_out.stdout).unwrap();
     let dump_ap = read_out.to_owned();
-    return dump_ap
+    println!("{}", dump_ap);
+    //return dump_ap
 }
 
 //what happens if no devmac

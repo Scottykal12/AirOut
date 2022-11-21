@@ -94,7 +94,7 @@ fn ap_scan() {
     .center_x(&ap_wind)
     .below_of(&scan_but, 10);
 
-    //scan_but.set_callback(move |_| frame_ap.set_label(&commands::dump_air()));
+    scan_but.set_callback(move |_| commands::dump_air());
 
     let mut close_but = Button::default()
     .with_size(300, 75)
