@@ -1,14 +1,15 @@
 use commands::ISMONMODE;
-use fltk::{app::{self, delete_widget, App}, prelude::*, window::*, button::*, frame::*, enums::Color, output};
+use fltk::{app::{self, delete_widget, App}, prelude::*, window::*, button::*, frame::*, enums::*, output, macros::menu};
 use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str::{self, FromStr}, os::unix::{process::CommandExt}, sync::mpsc::{self, Sender}, thread, cmp::Reverse};
+
 
 mod commands;
 
 fn interfaces() {  
-    let (snd, rcv) = mpsc::channel();
-    let snd_en = snd.clone();
-    let snd_dis = snd.clone();
-    let snd_ref = snd.clone();
+    // let (snd, rcv) = mpsc::channel();
+    // let snd_en = snd.clone();
+    // let snd_dis = snd.clone();
+    // let snd_ref = snd.clone();
 
     let mut int_wind = OverlayWindow::default()
     .with_size(1280, 800)
@@ -44,24 +45,26 @@ fn interfaces() {
         en_mon_int.set_callback(move |_| {
             commands::mon_mode_on();
             commands::get_interface();
-            snd_en.send("enabling").unwrap();
+            // snd_en.send("enabling").unwrap();
         });
 
         dis_mon_int.set_callback(move |_| {
             commands::mon_mode_off();
             commands::get_interface();
-            snd_dis.send("disabling").unwrap();
+            // snd_dis.send("disabling").unwrap();
         });
         refresh_int.set_callback(move |_| {
             commands::get_interface();
-            snd_ref.send("refreshing").unwrap();
+            // snd_ref.send("refreshing").unwrap();
+            frame_int.set_label(&commands::get_interface());
         });
 
+        
         //loops might be freezing things...
-        for received in rcv {
-            frame_int.set_label(&commands::get_interface());
-            println!("{}" , &received);
-        }
+        // for received in rcv {
+        //     frame_int.set_label(&commands::get_interface());
+        //     println!("{}" , &received);
+        // }
 
         // causes freeze
         // loop {
@@ -85,13 +88,13 @@ fn ap_scan() {
     .center_of(&ap_wind)
     .with_label("Scan area");
 
-    //can we get constant data
+    //can we get constant data stream data
     let mut frame_ap = Frame::default()
     .with_size(500, 500)
     .center_x(&ap_wind)
     .below_of(&scan_but, 10);
 
-    scan_but.set_callback(move |_| frame_ap.set_label(&commands::dump_air()));
+    //scan_but.set_callback(move |_| frame_ap.set_label(&commands::dump_air()));
 
     let mut close_but = Button::default()
     .with_size(300, 75)
@@ -113,6 +116,35 @@ fn pac_cap() {
     .with_size(300, 75)
     .with_label("Close Window")
     .with_pos(970, 715);
+
+    let mut choice_client = fltk::menu::Choice::default()
+    .with_size(300, 25)
+    .with_label("Client MAC: ")
+    .center_of(&pc_wind);
+    //.below_of(&scan_but, 10);
+    
+    choice_client.add_choice("qwer");
+
+    let mut choice_ap = fltk::menu::Choice::default()
+    .with_size(300, 25)
+    .with_label("AP MAC: ")
+    .center_of(&pc_wind)
+    .below_of(&choice_client, 10);
+    
+    choice_ap.add_choice("qwer");
+
+    let mut cap_hand_but = Button::default()
+    .with_size(300, 75)
+    .center_of(&pc_wind)
+    .below_of(&choice_ap, 10)
+    .with_label("Start Capturing Handshake");
+
+    //still need to handle file location
+    let file = String::from("./handcap");
+
+    cap_hand_but.set_callback(move |_| {
+        commands::play_air(String::from(choice_ap.choice().unwrap()), String::from(choice_client.choice().unwrap()), file.clone())
+    });
 
     pc_wind.end();
     pc_wind.show();

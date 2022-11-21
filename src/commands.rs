@@ -15,10 +15,12 @@ pub fn mon_mode_on() {
             Command::new("pkexec")
             .arg("airmon-ng")
             .arg("start")
-            .arg(&get_interface())
+            .arg(get_interface())
             .spawn()
             .unwrap();
             
+            get_interface();
+
             ISMONMODE = true;
 
             println!("{}", monenabled_ret)
@@ -38,7 +40,7 @@ pub fn mon_mode_off() {
             Command::new("pkexec")
             .arg("airmon-ng")
             .arg("stop")
-            .arg(&get_interface())
+            .arg(get_interface())
             .spawn()
             .unwrap();
             
@@ -51,9 +53,11 @@ pub fn mon_mode_off() {
             Command::new("pkexec")
             .arg("airmon-ng")
             .arg("stop")
-            .arg(&get_interface())
+            .arg(get_interface())
             .spawn()
             .unwrap();
+
+            get_interface();
             
             ISMONMODE = false;
 
@@ -62,7 +66,7 @@ pub fn mon_mode_off() {
     }
 }
 
-//let's use airmon-n plaese!!!
+//let's use airmon-ng plaese!!!
 pub fn get_interface() -> String {
     let iw_cmd = Command::new("iw")
     .arg("dev")
@@ -99,6 +103,7 @@ pub fn get_interface() -> String {
 }
 
 //need to stop airodump....
+//child.kll().expect("This might Stop it?")
 pub fn dump_air () -> String{
     let pkexec = Command::new("pkexec")
     .arg("airodump-ng")
@@ -113,7 +118,8 @@ pub fn dump_air () -> String{
     return dump_ap
 }
 
-pub fn play_air(bssid: String, devmac: String, filenamloc: String ) {
+//what happens if no devmac
+pub fn play_air(bssid: String, clientmac: String, filenamloc: String ) {
     let airplay = Command::new("pkexec")
     .arg("aireplay-ng")
     .arg(&get_interface())
