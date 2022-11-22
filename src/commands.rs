@@ -5,7 +5,7 @@ pub static mut ISMONMODE: bool = false;
 
 //isue with comman && execute
 
-pub fn mon_mode_on() {
+pub fn mon_mode_on(interface: &String) {
     //put interface into monotor mode
     let monenabled_ret = String::from("Moniotor mode enabled");
     
@@ -16,7 +16,7 @@ pub fn mon_mode_on() {
             Command::new("pkexec")
             .arg("airmon-ng")
             .arg("start")
-            .arg(get_interface())
+            .arg(interface)
             .spawn()
             .unwrap();
             
@@ -29,7 +29,7 @@ pub fn mon_mode_on() {
     }
 }
 
-pub fn mon_mode_off() {
+pub fn mon_mode_off(interface: &String) {
     //put interface into monotor mode
     let mondisabled_ret = String::from("Moniotor mode disabled");
     //let mut mon_interface = get_interface();
@@ -41,7 +41,7 @@ pub fn mon_mode_off() {
             Command::new("pkexec")
             .arg("airmon-ng")
             .arg("stop")
-            .arg(get_interface())
+            .arg(interface)
             .spawn()
             .unwrap();
             
@@ -54,7 +54,7 @@ pub fn mon_mode_off() {
             Command::new("pkexec")
             .arg("airmon-ng")
             .arg("stop")
-            .arg(get_interface())
+            .arg(interface)
             .spawn()
             .unwrap();
 

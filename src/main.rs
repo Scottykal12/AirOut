@@ -1,6 +1,6 @@
 use commands::ISMONMODE;
-use fltk::{app::{self, delete_widget, App}, prelude::*, window::*, button::*, frame::*, enums::*, output, macros::menu};
-use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str::{self, FromStr}, os::unix::{process::CommandExt}, sync::mpsc::{self, Sender}, thread, cmp::Reverse};
+use fltk::{app::{self, delete_widget, App, copy}, prelude::*, window::*, button::*, frame::*, enums::*, output, macros::menu};
+use std::{process::abort, process::Command, process::{Stdio, Output, Child}, str::{self, FromStr}, os::unix::{process::CommandExt}, sync::mpsc::{self, Sender}, thread, cmp::Reverse, io::BufRead, clone};
 
 
 mod commands;
@@ -10,32 +10,43 @@ fn interfaces() {
     // let snd_en = snd.clone();
     // let snd_dis = snd.clone();
     // let snd_ref = snd.clone();
+    let getint = &commands::get_interface().clone();
+    let int_list: Vec<&str> = getint.split("\n").collect();
+
 
     let mut int_wind = OverlayWindow::default()
     .with_size(1280, 800)
     .center_screen()
     .with_label("Interfaces");
 
+        let mut int_choice = fltk::menu::Choice::default()
+        .with_size(300, 20)
+        .with_label("Choose an Interface: ")
+        .center_x(&int_wind);
+
+        for int in &int_list {
+            int_choice.add_choice(int);
+        }
+
+        int_choice.set_value(1);
+
         let mut en_mon_int = Button::default()
         .with_size(300, 75)
         .with_label("Enable Monitor Mode")
-        .center_x(&int_wind);
+        .below_of(&int_choice, 10);
 
         let mut dis_mon_int = Button::default()
         .with_size(300, 75)
         .with_label("Disable Monitor Mode")
-        .below_of(&en_mon_int, 10)
-        .center_x(&int_wind);
+        .below_of(&en_mon_int, 10);
 
         let mut refresh_int = Button::default()
         .with_size(300, 75)
         .with_label("Refresh interfaces")
-        .below_of(&dis_mon_int, 10)
-        .center_x(&int_wind);
+        .below_of(&dis_mon_int, 10);
         
         let mut frame_int = Frame::default()
-        .with_size(300,20)
-        .with_pos(0, 0);
+        .with_size(300,20);
 
         let mut close_but = Button::default()
         .with_size(300, 75)
@@ -43,13 +54,13 @@ fn interfaces() {
         .with_pos(970, 715);
 
         en_mon_int.set_callback(move |_| {
-            commands::mon_mode_on();
+            commands::mon_mode_on(&int_choice.choice().unwrap().clone());
             commands::get_interface();
             // snd_en.send("enabling").unwrap();
         });
 
-        dis_mon_int.set_callback(move |_| {
-            commands::mon_mode_off();
+        dis_mon_int.set_callback( ||{
+            commands::mon_mode_off(&int_choice.choice().unwrap().clone());
             commands::get_interface();
             // snd_dis.send("disabling").unwrap();
         });
@@ -78,28 +89,41 @@ fn interfaces() {
 }
 
 fn ap_scan() {
+    let getint = &commands::get_interface().clone();
+    let int_list: Vec<&str> = getint.split("\n").collect();
+
     let mut ap_wind = OverlayWindow::default()
     .with_size(1280, 800)
     .center_screen()
     .with_label("AP Scan");
 
-    let mut scan_but = Button::default()
-    .with_size(300, 75)
-    .center_of(&ap_wind)
-    .with_label("Scan area");
+        let mut int_choice = fltk::menu::Choice::default()
+        .with_size(300, 20)
+        .with_label("Choose an Interface: ")
+        .center_x(&ap_wind);
 
-    //can we get constant data stream data
-    let mut frame_ap = Frame::default()
-    .with_size(500, 500)
-    .center_x(&ap_wind)
-    .below_of(&scan_but, 10);
+        for int in &int_list {  
+            int_choice.add_choice(int);
+        }
 
-    scan_but.set_callback(move |_| commands::dump_air());
+        let mut scan_but = Button::default()
+        .with_size(300, 75)
+        .center_x(&ap_wind)
+        .below_of(&int_choice, 10)
+        .with_label("Scan area");
 
-    let mut close_but = Button::default()
-    .with_size(300, 75)
-    .with_label("Close Window")
-    .with_pos(970, 715);
+        //can we get constant data stream data
+        let mut frame_ap = Frame::default()
+        .with_size(500, 500)
+        .center_x(&ap_wind)
+        .below_of(&scan_but, 10);
+
+        scan_but.set_callback(move |_| commands::dump_air());
+
+        let mut close_but = Button::default()
+        .with_size(300, 75)
+        .with_label("Close Window")
+        .with_pos(970, 715);
 
     ap_wind.end();
     ap_wind.show();
@@ -186,7 +210,6 @@ fn air_crack() {
 fn main() {
     let app = app::App::default();
 
-
     let mut wind = Window::default()
     .with_size(1280, 800)
     .center_screen()
@@ -235,9 +258,6 @@ fn main() {
     wind.end();
     wind.make_resizable(true);
     wind.show();
-    close_but.set_callback(move |_| {
-        wind.hide();
-        commands::mon_mode_off();
-    });
+    close_but.set_callback(move |_| wind.hide());
     app.run().unwrap();
 }
