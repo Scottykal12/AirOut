@@ -59,7 +59,7 @@ fn interfaces() {
             // snd_en.send("enabling").unwrap();
         });
 
-        dis_mon_int.set_callback( ||{
+        dis_mon_int.set_callback(move |_| {
             commands::mon_mode_off(&int_choice.choice().unwrap().clone());
             commands::get_interface();
             // snd_dis.send("disabling").unwrap();
