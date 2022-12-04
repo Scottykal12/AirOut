@@ -28,7 +28,7 @@ fn interfaces() {
             int_choice.add_choice(int);
         }
 
-        int_choice.set_value(1);
+        int_choice.set_value(0);
 
         let mut en_mon_int = Button::default()
         .with_size(300, 75)
@@ -53,33 +53,32 @@ fn interfaces() {
         .with_label("Close Window")
         .with_pos(970, 715);
 
+        
+        //This is ugly. There has to be a bettr way
+        let interface1 = int_choice.choice().clone().unwrap();
+        let interface2 = int_choice.choice().clone().unwrap();
+
         en_mon_int.set_callback(move |_| {
-            commands::mon_mode_on(&int_choice.choice().unwrap().clone());
+            commands::mon_mode_on(&interface1);
             commands::get_interface();
-            // snd_en.send("enabling").unwrap();
+            // let snd_en = snd_en.clone();
+            // thread::spawn(move || snd_en.send("enabling"));
         });
 
         dis_mon_int.set_callback(move |_| {
-            commands::mon_mode_off(&int_choice.choice().unwrap().clone());
+            commands::mon_mode_off(&interface2);
             commands::get_interface();
-            // snd_dis.send("disabling").unwrap();
+            // snd_dis.send("disabling");
         });
         refresh_int.set_callback(move |_| {
             commands::get_interface();
-            // snd_ref.send("refreshing").unwrap();
+            // snd_ref.send("refreshing");
             frame_int.set_label(&commands::get_interface());
         });
 
-        
-        //loops might be freezing things...
-        // for received in rcv {
+        // while let Ok(msg) = rcv.try_recv() {
         //     frame_int.set_label(&commands::get_interface());
-        //     println!("{}" , &received);
-        // }
-
-        // causes freeze
-        // loop {
-        //     frame_int.set_label(&commands::get_interface());
+        //     println!("you got {}", msg);
         // }
 
     int_wind.end();
