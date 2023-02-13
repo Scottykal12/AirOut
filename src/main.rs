@@ -1,4 +1,4 @@
-use commands::ISMONMODE;
+use commands::{ISMONMODE, dump_air};
 use fltk::{
     app::{self, copy, delete_widget, App},
     button::*,
@@ -45,10 +45,13 @@ fn interfaces() {
         .center_screen()
         .with_label("Interfaces");
 
+    let blank_frm = Frame::default().with_size(BUT_W, 20).center_x(&int_wind);
+
     let mut int_choice = fltk::menu::Choice::default()
         .with_size(BUT_W, 25)
         .with_label("Choose an Interface: ")
-        .center_x(&int_wind);
+        .center_x(&int_wind)
+        .below_of(&blank_frm, 0);
 
     for int in &int_list {
         int_choice.add_choice(int);
@@ -120,10 +123,13 @@ fn ap_scan() {
         .center_screen()
         .with_label("AP Scan");
 
+    let blank_frm = Frame::default().with_size(BUT_W, 20).center_x(&ap_wind);
+
     let mut int_choice = fltk::menu::Choice::default()
-        .with_size(BUT_W, BUT_H)
+        .with_size(BUT_W, 25)
         .with_label("Choose an Interface: ")
-        .center_x(&ap_wind);
+        .center_x(&ap_wind)
+        .below_of(&blank_frm, 0);
 
     for int in &int_list {
         int_choice.add_choice(int);
@@ -141,9 +147,10 @@ fn ap_scan() {
     let mut frame_ap = Frame::default()
         .with_size(500, 500)
         .center_x(&ap_wind)
-        .below_of(&scan_but, 10);
+        .below_of(&scan_but, 10)
+        .with_label("this is where i need data");
 
-    scan_but.set_callback(move |_| commands::dump_air());
+    // scan_but.set_callback(move |_| commands::dump_air());
 
     let mut close_but = Button::default()
         .with_size(BUT_W, BUT_H)
@@ -246,9 +253,7 @@ fn main() {
         .center_screen()
         .with_label("AirOut");
 
-    let mut blank_frm = Frame::default().with_size(BUT_W, 20).center_x(&wind);
-
-    blank_frm.set_color(Color::Blue);
+    let blank_frm = Frame::default().with_size(BUT_W, 20).center_x(&wind);
 
     let mut interfaces_but = Button::default()
         .with_size(BUT_W, BUT_H)

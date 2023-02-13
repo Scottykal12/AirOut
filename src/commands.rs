@@ -3,12 +3,51 @@ use std::{
     os::unix::process::CommandExt,
     process::{Command, Stdio},
     str::{self, FromStr},
-    thread,
+    thread, fs::read,
 };
 
 pub static mut ISMONMODE: bool = false;
 
-//isue with comman && execute
+pub fn is_mon_mode(interface: &String) -> String {
+    // return true if iw $int info type monitor
+    // iw dev wlp0s20f3 info | grep type | awk -F " " '{print $2}'
+    let iw_cmd = Command::new("iw")
+        .arg("dev")
+        .arg(interface)
+        .arg("info")
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let grep_child = Command::new("grep")
+        .arg("type")
+        .stdin(Stdio::from(iw_cmd.stdout.unwrap()))
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let awk_child = Command::new("awk")
+        .arg("-F")
+        .arg(" ")
+        .arg("{print $2}")
+        .stdin(Stdio::from(grep_child.stdout.unwrap()))
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let xargs_child = Command::new("xargs")
+        .arg("echo")
+        .arg("-n")
+        .stdin(Stdio::from(awk_child.stdout.unwrap()))
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+
+    let raw_out = xargs_child.wait_with_output().unwrap();
+    let read_out = str::from_utf8(&raw_out.stdout).unwrap();
+    let interface_mon = read_out.to_owned();
+    return interface_mon;
+
+}
+
+//issue with command && execute
 
 pub fn mon_mode_on(interface: &String) {
     //put interface into monotor mode
@@ -35,11 +74,6 @@ pub fn mon_mode_on(interface: &String) {
 }
 
 pub fn mon_mode_off(interface: &String) {
-    //put interface into monotor mode
-    let mondisabled_ret = String::from("Moniotor mode disabled");
-    //let mut mon_interface = get_interface();
-    //mon_interface.push_str("mon");
-
     //clean this up please!!!
     unsafe {
         if ISMONMODE == false {
@@ -53,8 +87,6 @@ pub fn mon_mode_off(interface: &String) {
             get_interface();
 
             ISMONMODE = false;
-
-            println!("{}", mondisabled_ret);
         } else {
             Command::new("pkexec")
                 .arg("airmon-ng")
@@ -66,8 +98,6 @@ pub fn mon_mode_off(interface: &String) {
             get_interface();
 
             ISMONMODE = false;
-
-            println!("{}", mondisabled_ret);
         }
     }
 }
@@ -104,27 +134,27 @@ pub fn get_interface() -> String {
     let raw_out = xargs_child.wait_with_output().unwrap();
     let read_out = str::from_utf8(&raw_out.stdout).unwrap();
     let interface_name = read_out.to_owned();
-    println!("Your wireless interface is {}", read_out);
     return interface_name;
 }
 
 //need to stop airodump....
 //child.kll().expect("This might Stop it?")
-pub fn dump_air() {
-    let mut pkexec = Command::new("pkexec")
+pub fn dump_air() -> &'static str {
+    let mut airodump = Command::new("pkexec")
         .arg("airodump-ng")
         .arg(get_interface())
-        .stdout(Stdio::piped())
+        // .stdout(Stdio::piped())
         .spawn()
         .unwrap();
 
-    thread::sleep(time::Duration::from_secs(10));
-    pkexec.kill().unwrap();
-
-    let raw_out = pkexec.wait_with_output().unwrap();
+    let raw_out = airodump.wait_with_output().unwrap();
     let read_out = str::from_utf8(&raw_out.stdout).unwrap();
-    let dump_ap = read_out.to_owned();
-    println!("{}", dump_ap);
+    // let dump_ap = read_out.to_owned();
+    println!("{}", read_out);
+    return "test";
+
+    // thread::sleep(time::Duration::from_secs(10));    
+    // airodump.kill().unwrap();
     //return dump_ap
 }
 
