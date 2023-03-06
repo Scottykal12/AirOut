@@ -1,4 +1,4 @@
-use commands::{dump_air, get_interface, ISMONMODE};
+use commands::{dump_air, get_interface};
 use fltk::{
     app::{self, copy, delete_widget, App},
     button::*,
@@ -50,6 +50,7 @@ fn interfaces() {
         int_choice.add_choice(int);
     }
 
+    // This seems to alway be the choice.
     int_choice.set_value(0);
 
     let mut en_mon_int = Button::default()
@@ -248,10 +249,11 @@ fn main() {
     let blank_frm = Frame::default().with_size(BUT_W, 20).center_x(&wind);
 
     // Show interfaces
-    let mut textbox = Frame::default().with_size(BUT_W, BUT_H);
-    thread::spawn(move || loop {
-        textbox.set_label(&commands::get_interface()[0]);
-    });
+    // let mut textbox = Frame::default().with_size(BUT_W, BUT_H);
+    // thread::spawn(move || loop {
+    //     textbox.with_label(&commands::get_interface()[1]);
+                
+    // });
 
     let mut interfaces_but = Button::default()
         .with_size(BUT_W, BUT_H)

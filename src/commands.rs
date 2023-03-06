@@ -6,8 +6,6 @@ use std::{
     thread, fs::read,
 };
 
-pub static mut ISMONMODE: bool = false;
-
 pub fn is_mon_mode(interface: &String) -> String {
     // return true if iw $int info type monitor
     // iw dev wlp0s20f3 info | grep type | awk -F " " '{print $2}'
