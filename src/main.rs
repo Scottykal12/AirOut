@@ -1,4 +1,4 @@
-use commands::{ISMONMODE, dump_air};
+use commands::{dump_air, get_interface, ISMONMODE};
 use fltk::{
     app::{self, copy, delete_widget, App},
     button::*,
@@ -33,13 +33,6 @@ const BUT_W: i32 = 300;
 const BUT_H: i32 = 75;
 
 fn interfaces() {
-    // let (snd, rcv) = mpsc::channel();
-    // let snd_en = snd.clone();
-    // let snd_dis = snd.clone();
-    // let snd_ref = snd.clone();
-    let getint = &commands::get_interface().clone();
-    let int_list: Vec<&str> = getint.split("\n").collect();
-
     let mut int_wind = OverlayWindow::default()
         .with_size(WIN_W, WIN_H)
         .center_screen()
@@ -53,7 +46,7 @@ fn interfaces() {
         .center_x(&int_wind)
         .below_of(&blank_frm, 0);
 
-    for int in &int_list {
+    for int in &commands::get_interface() {
         int_choice.add_choice(int);
     }
 
@@ -100,7 +93,7 @@ fn interfaces() {
     refresh_int.set_callback(move |_| {
         commands::get_interface();
         // snd_ref.send("refreshing");
-        frame_int.set_label(&commands::get_interface());
+        frame_int.set_label(&commands::get_interface()[0]);
     });
 
     // while let Ok(msg) = rcv.try_recv() {
@@ -115,9 +108,6 @@ fn interfaces() {
 }
 
 fn ap_scan() {
-    let getint = &commands::get_interface().clone();
-    let int_list: Vec<&str> = getint.split("\n").collect();
-
     let mut ap_wind = OverlayWindow::default()
         .with_size(WIN_W, WIN_H)
         .center_screen()
@@ -131,7 +121,7 @@ fn ap_scan() {
         .center_x(&ap_wind)
         .below_of(&blank_frm, 0);
 
-    for int in &int_list {
+    for int in &commands::get_interface() {
         int_choice.add_choice(int);
     }
 
@@ -244,6 +234,8 @@ fn air_crack() {
 }
 
 fn main() {
+    println!("{:?}", get_interface());
+
     let app = app::App::default();
     let widget_theme = WidgetTheme::new(ThemeType::Dark);
     widget_theme.apply();
@@ -254,6 +246,12 @@ fn main() {
         .with_label("AirOut");
 
     let blank_frm = Frame::default().with_size(BUT_W, 20).center_x(&wind);
+
+    // Show interfaces
+    let mut textbox = Frame::default().with_size(BUT_W, BUT_H);
+    thread::spawn(move || loop {
+        textbox.set_label(&commands::get_interface()[0]);
+    });
 
     let mut interfaces_but = Button::default()
         .with_size(BUT_W, BUT_H)

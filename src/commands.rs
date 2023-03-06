@@ -1,7 +1,7 @@
 use core::time;
 use std::{
     os::unix::process::CommandExt,
-    process::{Command, Stdio},
+    process::{Command, Stdio, Output},
     str::{self, FromStr},
     thread, fs::read,
 };
@@ -51,59 +51,46 @@ pub fn is_mon_mode(interface: &String) -> String {
 
 pub fn mon_mode_on(interface: &String) {
     //put interface into monotor mode
-    let monenabled_ret = String::from("Moniotor mode enabled");
+    if is_mon_mode(interface) == "monitor".to_string() {
+        println!("{} is in {} mode", interface , is_mon_mode(interface));
+    } else {
+        Command::new("pkexec")
+            .arg("airmon-ng")
+            .arg("start")
+            .arg(interface)
+            .output()
+            .unwrap();
 
-    unsafe {
-        if ISMONMODE == true {
-            println!("{}", monenabled_ret);
-        } else {
-            Command::new("pkexec")
-                .arg("airmon-ng")
-                .arg("start")
-                .arg(interface)
-                .spawn()
-                .unwrap();
-
-            get_interface();
-
-            ISMONMODE = true;
-
-            println!("{}", monenabled_ret)
-        }
+        get_interface();
+        println!("{} is in {} mode", interface , is_mon_mode(interface));
     }
 }
 
 pub fn mon_mode_off(interface: &String) {
-    //clean this up please!!!
-    unsafe {
-        if ISMONMODE == false {
-            Command::new("pkexec")
-                .arg("airmon-ng")
-                .arg("stop")
-                .arg(interface)
-                .spawn()
-                .unwrap();
+    // use ip link set
+    if is_mon_mode(interface) == "managed".to_string() {
+        Command::new("pkexec")
+            .arg("airmon-ng")
+            .arg("stop")
+            .arg(interface)
+            .output()
+            .unwrap();
 
-            get_interface();
+        println!("{} is in {} mode", interface , is_mon_mode(interface));
+    } else {
+        Command::new("pkexec")
+            .arg("airmon-ng")
+            .arg("stop")
+            .arg(interface)
+            .output()
+            .unwrap();
 
-            ISMONMODE = false;
-        } else {
-            Command::new("pkexec")
-                .arg("airmon-ng")
-                .arg("stop")
-                .arg(interface)
-                .spawn()
-                .unwrap();
-
-            get_interface();
-
-            ISMONMODE = false;
-        }
+        println!("{} is in {} mode", interface , is_mon_mode(interface));
     }
 }
 
-//let's use airmon-ng plaese!!! if we can use it without sudo...
-pub fn get_interface() -> String {
+// This only prints one item needs to be an array.
+pub fn get_interface() -> Vec<String> {
     let iw_cmd = Command::new("iw")
         .arg("dev")
         .stdout(Stdio::piped())
@@ -131,10 +118,21 @@ pub fn get_interface() -> String {
         .spawn()
         .unwrap();
 
+        // We get a panic here for some reason.
+
     let raw_out = xargs_child.wait_with_output().unwrap();
     let read_out = str::from_utf8(&raw_out.stdout).unwrap();
     let interface_name = read_out.to_owned();
-    return interface_name;
+    let ifaces_str = interface_name.split_whitespace().collect::<Vec<&str>>();
+    let mut ifaces: Vec<String> = vec![];
+
+    // Values converted from str to String
+    for i in ifaces_str {
+        ifaces.push(i.to_string());
+    }
+
+    // return interface_name;
+    return ifaces;
 }
 
 //need to stop airodump....
@@ -142,7 +140,7 @@ pub fn get_interface() -> String {
 pub fn dump_air() -> &'static str {
     let mut airodump = Command::new("pkexec")
         .arg("airodump-ng")
-        .arg(get_interface())
+        .arg(&get_interface()[0])
         // .stdout(Stdio::piped())
         .spawn()
         .unwrap();
@@ -162,7 +160,7 @@ pub fn dump_air() -> &'static str {
 pub fn play_air(bssid: String, clientmac: String, filenamloc: String) {
     let airplay = Command::new("pkexec")
         .arg("aireplay-ng")
-        .arg(&get_interface())
+        .arg(&get_interface()[0])
         .arg("--deauth")
         .arg("3")
         .arg("-a")
@@ -170,7 +168,7 @@ pub fn play_air(bssid: String, clientmac: String, filenamloc: String) {
 
     let pcap = Command::new("pkexec")
         .arg("airodump-ng")
-        .arg(&get_interface())
+        .arg(&get_interface()[0])
         .arg("--bssid")
         .arg(&bssid)
         .arg("-w")
