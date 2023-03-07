@@ -11,18 +11,6 @@ use fltk::{
     window::*,
 };
 use fltk_theme::{color_themes, widget_themes, ColorTheme, ThemeType, WidgetTheme};
-use std::{
-    clone,
-    cmp::Reverse,
-    io::BufRead,
-    os::unix::process::CommandExt,
-    process::abort,
-    process::Command,
-    process::{Child, Output, Stdio},
-    str::{self, FromStr},
-    sync::mpsc::{self, Sender},
-    thread,
-};
 
 mod commands;
 
@@ -51,7 +39,7 @@ fn interfaces() {
     }
 
     // This seems to alway be the choice.
-    int_choice.set_value(0);
+    int_choice.value();
 
     let mut en_mon_int = Button::default()
         .with_size(BUT_W, BUT_H)
@@ -75,21 +63,20 @@ fn interfaces() {
         .with_label("Close Window")
         .with_pos(WIN_W - BUT_W - 10, WIN_H - BUT_H - 10);
 
-    //This is ugly. There has to be a bettr way
-    let interface1 = int_choice.choice().clone().unwrap();
-    let interface2 = int_choice.choice().clone().unwrap();
 
-    en_mon_int.set_callback(move |_| {
-        commands::mon_mode_on(&interface1);
-        commands::get_interface();
-        // let snd_en = snd_en.clone();
-        // thread::spawn(move || snd_en.send("enabling"));
+    // Can I refresh the interfaces after a choice?
+    // may need to create a function to call
+
+    let interface1 = int_choice.clone();
+    let interface2 = int_choice.clone();
+    en_mon_int.set_callback(move |_| match interface1.choice() {
+        Some(choice) => commands::mon_mode_on(&choice),
+        None => println!("No Interface Chosen"),
     });
 
-    dis_mon_int.set_callback(move |_| {
-        commands::mon_mode_off(&interface2);
-        commands::get_interface();
-        // snd_dis.send("disabling");
+    dis_mon_int.set_callback(move |_| match interface2.choice() {
+        Some(choice) => commands::mon_mode_off(&choice),
+        None => println!("No Interface Chosen"),
     });
     refresh_int.set_callback(move |_| {
         commands::get_interface();
@@ -252,7 +239,7 @@ fn main() {
     // let mut textbox = Frame::default().with_size(BUT_W, BUT_H);
     // thread::spawn(move || loop {
     //     textbox.with_label(&commands::get_interface()[1]);
-                
+
     // });
 
     let mut interfaces_but = Button::default()
