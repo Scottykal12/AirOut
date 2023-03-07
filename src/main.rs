@@ -63,25 +63,31 @@ fn interfaces() {
         .with_label("Close Window")
         .with_pos(WIN_W - BUT_W - 10, WIN_H - BUT_H - 10);
 
-
-    // Can I refresh the interfaces after a choice?
-    // may need to create a function to call
-
-    let interface1 = int_choice.clone();
-    let interface2 = int_choice.clone();
+    let mut interface1 = int_choice.clone();
+    let mut interface2 = int_choice.clone();
     en_mon_int.set_callback(move |_| match interface1.choice() {
-        Some(choice) => commands::mon_mode_on(&choice),
+        Some(choice) => {
+            commands::mon_mode_on(&choice);
+            interface1.clear();
+            for i in &get_interface() {
+                interface1.add_choice(i);
+            }
+        }
         None => println!("No Interface Chosen"),
     });
 
     dis_mon_int.set_callback(move |_| match interface2.choice() {
-        Some(choice) => commands::mon_mode_off(&choice),
+        Some(choice) => {
+            commands::mon_mode_off(&choice);
+            interface2.clear();
+            for i in &get_interface() {
+                interface2.add_choice(i);
+            }
+        }
         None => println!("No Interface Chosen"),
     });
     refresh_int.set_callback(move |_| {
-        commands::get_interface();
-        // snd_ref.send("refreshing");
-        frame_int.set_label(&commands::get_interface()[0]);
+        // int_choice.clear();
     });
 
     // while let Ok(msg) = rcv.try_recv() {
